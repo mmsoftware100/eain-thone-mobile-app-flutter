@@ -20,8 +20,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'expense_tracker.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -30,12 +31,14 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE transactions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        serverId TEXT,
         description TEXT NOT NULL,
         amount REAL NOT NULL,
+        category TEXT NOT NULL,
         type TEXT NOT NULL,
         date INTEGER NOT NULL,
+        userId TEXT,
         isSynced INTEGER NOT NULL DEFAULT 0,
-        serverId TEXT,
         createdAt INTEGER NOT NULL,
         updatedAt INTEGER NOT NULL
       )
@@ -52,6 +55,24 @@ class DatabaseHelper {
         updatedAt INTEGER
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Check if columns exist before adding them
+      var tableInfo = await db.rawQuery("PRAGMA table_info(transactions)");
+      var columnNames = tableInfo.map((column) => column['name'] as String).toList();
+      
+      if (!columnNames.contains('serverId')) {
+        await db.execute('ALTER TABLE transactions ADD COLUMN serverId TEXT');
+      }
+      if (!columnNames.contains('category')) {
+        await db.execute('ALTER TABLE transactions ADD COLUMN category TEXT NOT NULL DEFAULT ""');
+      }
+      if (!columnNames.contains('userId')) {
+        await db.execute('ALTER TABLE transactions ADD COLUMN userId TEXT');
+      }
+    }
   }
 
   // Transaction CRUD operations
