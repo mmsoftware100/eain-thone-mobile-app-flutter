@@ -6,6 +6,7 @@ import '../providers/sync_provider.dart';
 import '../models/transaction.dart';
 import 'transaction_form_screen.dart';
 import 'transaction_detail_screen.dart';
+import 'transaction_list_screen.dart';
 import 'settings_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -118,7 +119,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            // TODO: Navigate to all transactions screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const TransactionListScreen(),
+                              ),
+                            );
                           },
                           child: const Text('View All'),
                         ),

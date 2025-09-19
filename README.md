@@ -72,5 +72,8 @@ User Registration / Login Flow from Home Page
 
 ## Features Imporvements
 
-- [ ] Home Scren's see all transaction button does not navigate to transaction list screen
+- [ ] Home Scren's see all transaction button does not navigate to transaction list screen,
+- [ ] Transaction list page show list of transation , can be filter by month, date range , income / expense type  , etc with pagination of local storage , 
 - [ ] Transaction Detail Screen's should able to swipe left / right to see previous / next transaction on the whold card / page 
+- [ ] add category management ? user can add / edit / delete category , and use in transaction form, offline first, sync also.
+
