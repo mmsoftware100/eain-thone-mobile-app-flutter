@@ -23,3 +23,11 @@ A expense tracker app for family.
 - [ ] Sync
 - [ ] Transaction CRUD
 
+
+## State Management, HTTP and flutter related cases
+
+- [ ] Use provider as state management
+- [ ] sqlite for local storage
+- [ ] DIO for HTTP
+- [ ] Clean and Modernized UI with smooth UI/UX
+
