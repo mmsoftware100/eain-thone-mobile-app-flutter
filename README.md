@@ -59,4 +59,18 @@ Transaction Form Screen
 - [ ] then show date picker for date , default today
 - [ ] then show submit button
 
-The main point is user just need to focus on description and amount , rest will be handled by app.
+The main point is user just need to focus on description and amount , rest will be handled by app. 
+UI Hierarcy should focus on big description input 
+
+
+User Registration / Login Flow from Home Page
+- [ ] if user click on home page's cloud icon to sync, check user is already signed in, sync data if user is signed in, else show login screen
+- [ ] if user click on login button in login screen, show login form (email, password) , on submit call login api , if success redirect to home page , else show error message
+- [ ] if user click on register button in login screen, show register form (name, email, password) , on submit call register api , if success redirect to login page , else show error message
+- [ ] then sync local records with server.
+
+
+## Features Imporvements
+
+- [ ] Home Scren's see all transaction button does not navigate to transaction list screen
+- [ ] Transaction Detail Screen's should able to swipe left / right to see previous / next transaction on the whold card / page 

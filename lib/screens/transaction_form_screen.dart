@@ -197,160 +197,210 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Transaction Type Toggle
+              // Big Description Field - Primary Focus
               Card(
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Transaction Type',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        'What did you spend on?',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: Colors.grey[700],
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: RadioListTile<TransactionType>(
-                              title: const Text('Income'),
-                              value: TransactionType.income,
-                              groupValue: _selectedType,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedType = value!;
-                                  // Reset category when type changes
-                                  _selectedCategory = _currentCategories.first;
-                                });
-                              },
-                              activeColor: Colors.green,
-                            ),
+                      TextFormField(
+                        controller: _descriptionController,
+                        maxLines: 4,
+                        style: const TextStyle(fontSize: 18),
+                        decoration: const InputDecoration(
+                          hintText: 'Describe your transaction...\ne.g., Lunch at McDonald\'s, Grocery shopping, Salary payment',
+                          hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
-                          Expanded(
-                            child: RadioListTile<TransactionType>(
-                              title: const Text('Expense'),
-                              value: TransactionType.expense,
-                              groupValue: _selectedType,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedType = value!;
-                                  // Reset category when type changes
-                                  _selectedCategory = _currentCategories.first;
-                                });
-                              },
-                              activeColor: Colors.red,
-                            ),
-                          ),
-                        ],
+                          contentPadding: EdgeInsets.all(16),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a description';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // Description Field
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Enter transaction description',
-                  prefixIcon: Icon(Icons.description),
-                  border: OutlineInputBorder(),
+              // Amount Field - Secondary Focus
+              Card(
+                elevation: 1,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Amount',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _amountController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        decoration: const InputDecoration(
+                          hintText: '0.00',
+                          hintStyle: TextStyle(fontSize: 24, color: Colors.grey),
+                          prefixIcon: Icon(Icons.attach_money, size: 28),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter an amount';
+                          }
+                          final amount = double.tryParse(value);
+                          if (amount == null || amount <= 0) {
+                            return 'Please enter a valid amount';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Amount Field
-              TextFormField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                  hintText: '0.00',
-                  prefixIcon: Icon(Icons.attach_money),
-                  border: OutlineInputBorder(),
+              // Transaction Type - Side by Side Buttons
+              Text(
+                'Transaction Type',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  final amount = double.tryParse(value);
-                  if (amount == null || amount <= 0) {
-                    return 'Please enter a valid amount';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
-
-              // Category Dropdown
-              DropdownButtonFormField<String>(
-                value: _currentCategories.contains(_selectedCategory)
-                    ? _selectedCategory
-                    : _currentCategories.first,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  prefixIcon: Icon(Icons.category),
-                  border: OutlineInputBorder(),
-                ),
-                items: _currentCategories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value!;
-                  });
-                },
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _selectedType = TransactionType.expense;
+                          _selectedCategory = _currentCategories.first;
+                        });
+                      },
+                      icon: const Icon(Icons.remove_circle_outline),
+                      label: const Text('Expense'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _selectedType == TransactionType.expense
+                            ? Colors.red
+                            : Colors.grey[300],
+                        foregroundColor: _selectedType == TransactionType.expense
+                            ? Colors.white
+                            : Colors.grey[700],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _selectedType = TransactionType.income;
+                          _selectedCategory = _currentCategories.first;
+                        });
+                      },
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text('Income'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _selectedType == TransactionType.income
+                            ? Colors.green
+                            : Colors.grey[300],
+                        foregroundColor: _selectedType == TransactionType.income
+                            ? Colors.white
+                            : Colors.grey[700],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Date Picker
+              Text(
+                'Date',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 12),
               InkWell(
                 onTap: _selectDate,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date',
-                    prefixIcon: Icon(Icons.calendar_today),
-                    border: OutlineInputBorder(),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[400]!),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    DateFormat('MMM dd, yyyy').format(_selectedDate),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Text(
+                        DateFormat('MMM dd, yyyy').format(_selectedDate),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(height: 32),
 
-              // Save Button
+              // Submit Button - Prominent
               Consumer<TransactionProvider>(
                 builder: (context, transactionProvider, child) {
                   return ElevatedButton(
                     onPressed: transactionProvider.isLoading ? null : _saveTransaction,
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       backgroundColor: _selectedType == TransactionType.income
                           ? Colors.green
                           : Colors.red,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 3,
                     ),
                     child: transactionProvider.isLoading
                         ? const SizedBox(
-                            height: 20,
-                            width: 20,
+                            height: 24,
+                            width: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -360,7 +410,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                             widget.transaction == null
                                 ? 'Add Transaction'
                                 : 'Update Transaction',
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                   );
                 },
