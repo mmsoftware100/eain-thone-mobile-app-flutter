@@ -48,6 +48,9 @@ dependencies:
   # Connectivity
   connectivity_plus: ^6.0.3
   
+  # Persistent storage
+  shared_preferences: ^2.2.2
+  
   # UI components
   intl: ^0.19.0
 

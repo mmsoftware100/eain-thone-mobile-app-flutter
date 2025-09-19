@@ -42,3 +42,21 @@ A expense tracker app for family.
 - [ ] DIO for HTTP
 - [ ] Clean and Modernized UI with smooth UI/UX
 
+
+
+## Screen Flow
+
+
+When start app
+- [ ] new user should show Login Page 
+- [ ] if user is alredy decide to use offline first , show direct Home Page
+
+Transaction Form Screen
+
+- [ ] first show big text area input for description
+- [ ] then show number input for amount
+- [ ] then show side by side mode / switch or two button  for type (expense / income) , default as expense selected
+- [ ] then show date picker for date , default today
+- [ ] then show submit button
+
+The main point is user just need to focus on description and amount , rest will be handled by app.

@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/sync_provider.dart';
-import 'services/api_service.dart';
-import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/api_service.dart';
+import 'services/preferences_service.dart';
 
 void main() {
   // Initialize API service
@@ -46,18 +47,66 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
+  bool _isInitializing = true;
+  bool _shouldShowLogin = true;
+
   @override
   void initState() {
     super.initState();
-    // Initialize providers
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().initialize();
-      context.read<SyncProvider>().initialize();
-    });
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      final prefsService = await PreferencesService.getInstance();
+      final authProvider = context.read<AuthProvider>();
+      
+      // Check if user has seen onboarding and chosen offline mode
+      final hasSeenOnboarding = await prefsService.hasSeenOnboarding();
+      final offlinePreference = await prefsService.getOfflinePreference();
+      
+      // If user has chosen offline mode, go directly to home
+      if (hasSeenOnboarding && offlinePreference) {
+        setState(() {
+          _shouldShowLogin = false;
+          _isInitializing = false;
+        });
+        return;
+      }
+      
+      // If user is authenticated, go to home
+      if (authProvider.isAuthenticated) {
+        setState(() {
+          _shouldShowLogin = false;
+          _isInitializing = false;
+        });
+        return;
+      }
+      
+      // Otherwise, show login screen
+      setState(() {
+        _shouldShowLogin = true;
+        _isInitializing = false;
+      });
+    } catch (e) {
+      // On error, default to login screen
+      setState(() {
+        _shouldShowLogin = true;
+        _isInitializing = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isInitializing) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         if (authProvider.isLoading) {
@@ -68,15 +117,18 @@ class _AuthWrapperState extends State<AuthWrapper> {
           );
         }
 
+        // If authenticated, always show home
         if (authProvider.isAuthenticated) {
-          // Initialize transaction provider when authenticated
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<TransactionProvider>().initialize();
-          });
           return const HomeScreen();
-        } else {
-          return const LoginScreen();
         }
+
+        // If not authenticated but user chose offline mode, show home
+        if (!_shouldShowLogin) {
+          return const OfflineHomeWrapper();
+        }
+
+        // Otherwise show login
+        return const LoginScreen();
       },
     );
   }

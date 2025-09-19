@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../services/preferences_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 
@@ -199,12 +200,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          // Set offline mode preference
+                          final prefsService = await PreferencesService.getInstance();
+                          await prefsService.setOfflinePreference(true);
+                          await prefsService.setHasSeenOnboarding(true);
+                          
                           // Skip login and go to home screen in offline mode
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
+                              builder: (context) => const OfflineHomeWrapper(),
                             ),
                           );
                         },
