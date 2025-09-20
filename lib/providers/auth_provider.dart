@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/database_helper.dart';
+import '../services/api_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final ApiService _apiService = ApiService();
   
   User? _user;
   bool _isLoading = false;
@@ -34,28 +36,24 @@ class AuthProvider with ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // For now, simulate login with dummy data
-      await Future.delayed(const Duration(seconds: 1));
+      // Call real API
+      final response = await _apiService.login(email, password);
       
-      // Simulate successful login
-      final user = User(
-        id: 1,
-        name: 'Demo User',
-        email: email,
-        token: 'dummy_token_${DateTime.now().millisecondsSinceEpoch}',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      // Save user to local database
-      await _databaseHelper.deleteUser(); // Clear existing user
-      await _databaseHelper.insertUser(user);
-      
-      _user = user;
-      _isAuthenticated = true;
-      _clearError();
-      return true;
+      if (response.success && response.data != null) {
+        final user = response.data!;
+        
+        // Save user to local database
+        await _databaseHelper.deleteUser(); // Clear existing user
+        await _databaseHelper.insertUser(user);
+        
+        _user = user;
+        _isAuthenticated = true;
+        _clearError();
+        return true;
+      } else {
+        _setError(response.error ?? 'Login failed');
+        return false;
+      }
     } catch (e) {
       _setError('Login failed: $e');
       return false;
@@ -68,28 +66,24 @@ class AuthProvider with ChangeNotifier {
   Future<bool> register(String name, String email, String password) async {
     _setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // For now, simulate registration with dummy data
-      await Future.delayed(const Duration(seconds: 1));
+      // Call real API
+      final response = await _apiService.register(name, email, password);
       
-      // Simulate successful registration
-      final user = User(
-        id: 1,
-        name: name,
-        email: email,
-        token: 'dummy_token_${DateTime.now().millisecondsSinceEpoch}',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      // Save user to local database
-      await _databaseHelper.deleteUser(); // Clear existing user
-      await _databaseHelper.insertUser(user);
-      
-      _user = user;
-      _isAuthenticated = true;
-      _clearError();
-      return true;
+      if (response.success && response.data != null) {
+        final user = response.data!;
+        
+        // Save user to local database
+        await _databaseHelper.deleteUser(); // Clear existing user
+        await _databaseHelper.insertUser(user);
+        
+        _user = user;
+        _isAuthenticated = true;
+        _clearError();
+        return true;
+      } else {
+        _setError(response.error ?? 'Registration failed');
+        return false;
+      }
     } catch (e) {
       _setError('Registration failed: $e');
       return false;
@@ -102,12 +96,22 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     _setLoading(true);
     try {
+      // Call real API logout if user is authenticated
+      if (_user?.token != null) {
+        await _apiService.logout();
+      }
+      
+      // Clear local data regardless of API call result
       await _databaseHelper.deleteUser();
       _user = null;
       _isAuthenticated = false;
       _clearError();
     } catch (e) {
-      _setError('Logout failed: $e');
+      // Even if API logout fails, clear local data
+      await _databaseHelper.deleteUser();
+      _user = null;
+      _isAuthenticated = false;
+      _setError('Logout completed but server notification failed: $e');
     } finally {
       _setLoading(false);
     }
@@ -119,16 +123,21 @@ class AuthProvider with ChangeNotifier {
     
     _setLoading(true);
     try {
-      final updatedUser = _user!.copyWith(
-        name: name,
-        email: email,
-        updatedAt: DateTime.now(),
-      );
-
-      await _databaseHelper.updateUser(updatedUser);
-      _user = updatedUser;
-      _clearError();
-      return true;
+      // Call real API to update profile
+      final response = await _apiService.updateUserProfile(name, email);
+      
+      if (response.success && response.data != null) {
+        final updatedUser = response.data!;
+        
+        // Update local database
+        await _databaseHelper.updateUser(updatedUser);
+        _user = updatedUser;
+        _clearError();
+        return true;
+      } else {
+        _setError(response.error ?? 'Failed to update profile');
+        return false;
+      }
     } catch (e) {
       _setError('Failed to update profile: $e');
       return false;

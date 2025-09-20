@@ -9,8 +9,7 @@ class ApiService {
 
   late Dio _dio;
   static const String baseUrl =
-      'https://eain-thone-backend-express-typescript.onrender.com'; // Replace with actual API URL
-  // static const String baseUrl = 'https://api.example.com'; // Replace with actual API URL
+      'https://eain-thone-backend-express-typescript.onrender.com/api/v1'; // Real API URL
 
   void initialize() {
     _dio = Dio(
@@ -62,12 +61,12 @@ class ApiService {
         data: {'email': email, 'password': password},
       );
 
-      if (response.statusCode == 200) {
-        final user = User.fromJson(response.data['user']);
-        setAuthToken(response.data['token']);
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final user = User.fromJson(response.data['data']['user']);
+        setAuthToken(response.data['data']['token']);
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error('Login failed');
+        return ApiResponse.error(response.data['message'] ?? 'Login failed');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -87,12 +86,12 @@ class ApiService {
         data: {'name': name, 'email': email, 'password': password},
       );
 
-      if (response.statusCode == 201) {
-        final user = User.fromJson(response.data['user']);
-        setAuthToken(response.data['token']);
+      if (response.statusCode == 201 && response.data['success'] == true) {
+        final user = User.fromJson(response.data['data']['user']);
+        setAuthToken(response.data['data']['token']);
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error('Registration failed');
+        return ApiResponse.error(response.data['message'] ?? 'Registration failed');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -120,14 +119,14 @@ class ApiService {
     try {
       final response = await _dio.get('/transactions');
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['transactions'];
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List<dynamic> data = response.data['data']['transactions'];
         final transactions = data
             .map((json) => Transaction.fromJson(json))
             .toList();
         return ApiResponse.success(transactions);
       } else {
-        return ApiResponse.error('Failed to fetch transactions');
+        return ApiResponse.error(response.data['message'] ?? 'Failed to fetch transactions');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -145,13 +144,13 @@ class ApiService {
         data: transaction.toJson(),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 && response.data['success'] == true) {
         final createdTransaction = Transaction.fromJson(
-          response.data['transaction'],
+          response.data['data']['transaction'],
         );
         return ApiResponse.success(createdTransaction);
       } else {
-        return ApiResponse.error('Failed to create transaction');
+        return ApiResponse.error(response.data['message'] ?? 'Failed to create transaction');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -169,13 +168,13 @@ class ApiService {
         data: transaction.toJson(),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['success'] == true) {
         final updatedTransaction = Transaction.fromJson(
-          response.data['transaction'],
+          response.data['data']['transaction'],
         );
         return ApiResponse.success(updatedTransaction);
       } else {
-        return ApiResponse.error('Failed to update transaction');
+        return ApiResponse.error(response.data['message'] ?? 'Failed to update transaction');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -188,10 +187,10 @@ class ApiService {
     try {
       final response = await _dio.delete('/transactions/$serverId');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['success'] == true) {
         return ApiResponse.success(null);
       } else {
-        return ApiResponse.error('Failed to delete transaction');
+        return ApiResponse.error(response.data['message'] ?? 'Failed to delete transaction');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -228,13 +227,13 @@ class ApiService {
   // User profile endpoints
   Future<ApiResponse<User>> getUserProfile() async {
     try {
-      final response = await _dio.get('/user/profile');
+      final response = await _dio.get('/auth/me');
 
-      if (response.statusCode == 200) {
-        final user = User.fromJson(response.data['user']);
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final user = User.fromJson(response.data['data']['user']);
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error('Failed to fetch user profile');
+        return ApiResponse.error(response.data['message'] ?? 'Failed to fetch user profile');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
@@ -246,15 +245,15 @@ class ApiService {
   Future<ApiResponse<User>> updateUserProfile(String name, String email) async {
     try {
       final response = await _dio.put(
-        '/user/profile',
+        '/auth/me',
         data: {'name': name, 'email': email},
       );
 
-      if (response.statusCode == 200) {
-        final user = User.fromJson(response.data['user']);
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final user = User.fromJson(response.data['data']['user']);
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error('Failed to update profile');
+        return ApiResponse.error(response.data['message'] ?? 'Failed to update profile');
       }
     } on DioException catch (e) {
       return ApiResponse.error(_handleDioError(e));
