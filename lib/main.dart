@@ -5,6 +5,7 @@ import 'providers/auth_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/sync_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/category_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_service.dart';
@@ -26,7 +27,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => TransactionProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(
+          create: (context) => TransactionProvider(
+            categoryProvider: context.read<CategoryProvider>(),
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => SyncProvider()),
       ],
       child: Consumer<LanguageProvider>(

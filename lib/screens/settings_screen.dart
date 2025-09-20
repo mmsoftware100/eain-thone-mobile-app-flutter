@@ -5,6 +5,7 @@ import '../providers/transaction_provider.dart';
 import '../providers/language_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/localization_helper.dart';
+import 'category_management_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -169,6 +170,21 @@ class SettingsScreen extends StatelessWidget {
               Card(
                 child: Column(
                   children: [
+                    ListTile(
+                      leading: const Icon(Icons.category),
+                      title: const Text('Manage Categories'),
+                      subtitle: const Text('Add, edit, or delete categories'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CategoryManagementScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.storage),
                       title: const Text('Local Data'),

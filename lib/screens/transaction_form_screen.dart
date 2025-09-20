@@ -24,47 +24,27 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
   final _amountFocusNode = FocusNode();
-  
+
   TransactionType _selectedType = TransactionType.expense;
-  String _selectedCategory = 'Food';
+  int? _selectedCategoryId;
   DateTime _selectedDate = DateTime.now();
-
-  final List<String> _expenseCategories = [
-    'Food',
-    'Transport',
-    'Shopping',
-    'Entertainment',
-    'Health',
-    'Education',
-    'Utilities',
-    'Other',
-  ];
-
-  final List<String> _incomeCategories = [
-    'Salary',
-    'Business',
-    'Investment',
-    'Gift',
-    'Other',
-  ];
-
-  List<String> get _currentCategories {
-    return _selectedType == TransactionType.expense
-        ? _expenseCategories
-        : _incomeCategories;
-  }
 
   @override
   void initState() {
     super.initState();
     if (widget.transaction != null) {
       _descriptionController.text = widget.transaction!.description;
-      _amountController.text = NumberFormatter.formatNumber(widget.transaction!.amount);
+      _amountController.text =
+          NumberFormatter.formatNumber(widget.transaction!.amount);
       _selectedType = widget.transaction!.type;
-      _selectedCategory = widget.transaction!.category;
+      _selectedCategoryId = widget.transaction!.categoryId;
       _selectedDate = widget.transaction!.date;
     } else {
-      // For new transactions, auto-focus the amount field
+      // Set a default category for new transactions
+      final categoryProvider = context.read<CategoryProvider>();
+      if (categoryProvider.expenseCategories.isNotEmpty) {
+        _selectedCategoryId = categoryProvider.expenseCategories.first.id;
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _amountFocusNode.requestFocus();
       });
@@ -95,13 +75,23 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
   Future<void> _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
+      if (_selectedCategoryId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a category.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       final transactionProvider = context.read<TransactionProvider>();
-      
+
       final transaction = Transaction(
         id: widget.transaction?.id,
         description: _descriptionController.text.trim(),
         amount: NumberFormatter.getNumericValue(_amountController.text) ?? 0.0,
-        category: _selectedCategory,
+        categoryId: _selectedCategoryId!,
         type: _selectedType,
         date: _selectedDate,
         createdAt: widget.transaction?.createdAt ?? DateTime.now(),
@@ -239,25 +229,47 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                     const SizedBox(height: 24),
 
                     // Transaction Type Toggle
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _selectedType = TransactionType.expense;
-                                  _selectedCategory = _currentCategories.first;
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                decoration: BoxDecoration(
+                    Consumer<CategoryProvider>(
+                      builder: (context, categoryProvider, child) {
+                        final categories =
+                            _selectedType == TransactionType.expense
+                                ? categoryProvider.expenseCategories
+                                : categoryProvider.incomeCategories;
+
+                        // Ensure _selectedCategoryId is valid for the current list
+                        if (_selectedCategoryId != null &&
+                            !categories.any((c) => c.id == _selectedCategoryId)) {
+                          _selectedCategoryId =
+                              categories.isNotEmpty ? categories.first.id : null;
+                        }
+
+                        return Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedType = TransactionType.expense;
+                                          _selectedCategoryId = categoryProvider
+                                                  .expenseCategories
+                                                  .isNotEmpty
+                                              ? categoryProvider
+                                                  .expenseCategories.first.id
+                                              : null;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        decoration: BoxDecoration(
                                   color: _selectedType == TransactionType.expense
                                       ? Colors.red
                                       : Colors.transparent,
@@ -287,125 +299,146 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                               ),
                             ),
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _selectedType = TransactionType.income;
-                                  _selectedCategory = _currentCategories.first;
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                decoration: BoxDecoration(
-                                  color: _selectedType == TransactionType.income
-                                      ? Colors.green
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_circle_outline,
-                                      color: _selectedType == TransactionType.income
-                                          ? Colors.white
-                                          : Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Income',
-                                      style: TextStyle(
-                                        color: _selectedType == TransactionType.income
-                                            ? Colors.white
-                                            : Colors.grey[600],
-                                        fontWeight: FontWeight.w600,
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedType = TransactionType.income;
+                                          _selectedCategoryId = categoryProvider
+                                                  .incomeCategories
+                                                  .isNotEmpty
+                                              ? categoryProvider
+                                                  .incomeCategories.first.id
+                                              : null;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        decoration: BoxDecoration(
+                                          color: _selectedType ==
+                                                  TransactionType.income
+                                              ? Colors.green
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.add_circle_outline,
+                                              color: _selectedType ==
+                                                      TransactionType.income
+                                                  ? Colors.white
+                                                  : Colors.grey[600],
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Income',
+                                              style: TextStyle(
+                                                color: _selectedType ==
+                                                        TransactionType.income
+                                                    ? Colors.white
+                                                    : Colors.grey[600],
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                            const SizedBox(height: 24),
 
-                    // Description
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextFormField(
-                        controller: _descriptionController,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: InputDecoration(
-                          hintText: 'What was this for?',
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Enter description';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Category & Date Row
-                    Row(
-                      children: [
-                        // Category
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedCategory,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
+                            // Description
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              items: _currentCategories.map((category) {
-                                return DropdownMenuItem(
-                                  value: category,
-                                  child: Text(category),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() {
-                                    _selectedCategory = value;
-                                  });
-                                }
-                              },
+                              child: TextFormField(
+                                controller: _descriptionController,
+                                style: const TextStyle(fontSize: 16),
+                                decoration: InputDecoration(
+                                  hintText: 'What was this for?',
+                                  hintStyle: TextStyle(color: Colors.grey[400]),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Enter description';
+                                  }
+                                  return null;
+                                },
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
+                            const SizedBox(height: 24),
+
+                            // Category & Date Row
+                            Row(
+                              children: [
+                                // Category
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              Colors.black.withOpacity(0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child:
+                                        DropdownButtonFormField<int>(
+                                      value: _selectedCategoryId,
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                      items: categories.map((category) {
+                                        return DropdownMenuItem(
+                                          value: category.id,
+                                          child: Row(
+                                            children: [
+                                              Icon(category.icon, size: 20),
+                                              const SizedBox(width: 8),
+                                              Text(category.name),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          setState(() {
+                                            _selectedCategoryId = value;
+                                          });
+                                        }
+                                      },
+                                      isExpanded: true,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
                         // Date
                         Expanded(
                           child: GestureDetector(
@@ -425,8 +458,8 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.calendar_today, 
-                                       color: Colors.grey[600], size: 20),
+                                  Icon(Icons.calendar_today,
+                                      color: Colors.grey[600], size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -443,9 +476,13 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                     ),
                     const SizedBox(height: 40),
                   ],
-                ),
-              ),
+                );
+              },
             ),
+          ],
+        ),
+      ),
+    ),
 
             // Save Button - Fixed at bottom
             Container(

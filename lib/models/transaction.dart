@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'category.dart';
 
 class Transaction {
   final int? id;
   final String? serverId;
   final String description;
   final double amount;
-  final String category;
+  final int categoryId;
   final TransactionType type;
   final DateTime date;
   final String? userId;
@@ -13,18 +14,22 @@ class Transaction {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // This field is not stored in the database, but populated from the Category table
+  Category? category;
+
   Transaction({
     this.id,
     this.serverId,
     required this.description,
     required this.amount,
-    required this.category,
+    required this.categoryId,
     required this.type,
     required this.date,
     this.userId,
     this.isSynced = false,
     DateTime? createdAt,
     DateTime? updatedAt,
+    this.category,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -33,26 +38,28 @@ class Transaction {
     String? serverId,
     String? description,
     double? amount,
-    String? category,
+    int? categoryId,
     TransactionType? type,
     DateTime? date,
     String? userId,
     bool? isSynced,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Category? category,
   }) {
     return Transaction(
       id: id ?? this.id,
       serverId: serverId ?? this.serverId,
       description: description ?? this.description,
       amount: amount ?? this.amount,
-      category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
       type: type ?? this.type,
       date: date ?? this.date,
       userId: userId ?? this.userId,
       isSynced: isSynced ?? this.isSynced,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      category: category ?? this.category,
     );
   }
 
@@ -62,7 +69,7 @@ class Transaction {
       'serverId': serverId,
       'description': description,
       'amount': amount,
-      'category': category,
+      'categoryId': categoryId,
       'type': type.name,
       'date': date.millisecondsSinceEpoch,
       'userId': userId,
@@ -78,7 +85,7 @@ class Transaction {
       serverId: map['serverId'] as String?,
       description: map['description'] as String,
       amount: (map['amount'] as num).toDouble(),
-      category: map['category'] as String,
+      categoryId: map['categoryId'] as int,
       type: TransactionType.values.firstWhere(
         (e) => e.name == map['type'],
         orElse: () => TransactionType.expense,
@@ -96,7 +103,7 @@ class Transaction {
       'id': id,
       'description': description,
       'amount': amount,
-      'category': category,
+      'category': category?.name, // Send category name to API
       'type': type.name,
       'date': date.toIso8601String(),
       'userId': userId,
@@ -106,12 +113,39 @@ class Transaction {
     };
   }
 
-  factory Transaction.fromJson(String source) => 
-      Transaction.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    // This is more complex now. When we get a transaction from the server,
+    // we get a category NAME. We need to find the corresponding category ID
+    // in the local database. This logic should be handled in the provider/service
+    // that calls this fromJson, after it has fetched the category data.
+    // For now, we'll set a placeholder categoryId.
+    return Transaction(
+      serverId: json['_id'] as String?,
+      description: json['description'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      categoryId: -1, // Placeholder
+      type: TransactionType.values.firstWhere(
+        (e) => e.name == json['type'],
+        orElse: () => TransactionType.expense,
+      ),
+      date: DateTime.parse(json['date'] as String),
+      userId: json['userId'] as String?,
+      isSynced: true, // Data from server is always synced
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      // We can't create the full Category object here without more context
+      category: Category(
+        id: -1,
+        name: json['category'] as String,
+        icon: Icons.category,
+        type: json['type'] as String,
+      ),
+    );
+  }
 
   @override
   String toString() {
-    return 'Transaction(id: $id, description: $description, amount: $amount, category: $category, type: $type, date: $date, userId: $userId, isSynced: $isSynced)';
+    return 'Transaction(id: $id, description: $description, amount: $amount, categoryId: $categoryId, type: $type, date: $date, userId: $userId, isSynced: $isSynced)';
   }
 
   @override
@@ -121,7 +155,7 @@ class Transaction {
         other.id == id &&
         other.description == description &&
         other.amount == amount &&
-        other.category == category &&
+        other.categoryId == categoryId &&
         other.type == type &&
         other.date == date &&
         other.userId == userId &&
@@ -133,7 +167,7 @@ class Transaction {
     return id.hashCode ^
         description.hashCode ^
         amount.hashCode ^
-        category.hashCode ^
+        categoryId.hashCode ^
         type.hashCode ^
         date.hashCode ^
         userId.hashCode ^

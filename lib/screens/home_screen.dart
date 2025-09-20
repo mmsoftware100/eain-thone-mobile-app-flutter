@@ -303,6 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTransactionTile(Transaction transaction) {
     final isIncome = transaction.type == TransactionType.income;
+    final category = transaction.category;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -310,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: CircleAvatar(
           backgroundColor: isIncome ? Colors.green[100] : Colors.red[100],
           child: Icon(
-            _getCategoryIcon(transaction.category),
+            category?.icon ?? Icons.category,
             color: isIncome ? Colors.green[700] : Colors.red[700],
           ),
         ),
@@ -321,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(transaction.category),
+            Text(category?.name ?? 'Uncategorized'),
             Text(
               DateFormat('MMM dd, yyyy').format(transaction.date),
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
@@ -355,32 +356,5 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'food':
-        return Icons.restaurant;
-      case 'transport':
-        return Icons.directions_car;
-      case 'shopping':
-        return Icons.shopping_bag;
-      case 'entertainment':
-        return Icons.movie;
-      case 'health':
-        return Icons.local_hospital;
-      case 'education':
-        return Icons.school;
-      case 'utilities':
-        return Icons.electrical_services;
-      case 'salary':
-        return Icons.work;
-      case 'business':
-        return Icons.business;
-      case 'investment':
-        return Icons.trending_up;
-      default:
-        return Icons.category;
-    }
   }
 }

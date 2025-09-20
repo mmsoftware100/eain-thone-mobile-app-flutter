@@ -1,12 +1,16 @@
 import 'package:flutter/foundation.dart';
 import '../models/transaction.dart';
 import '../services/database_helper.dart';
+import 'category_provider.dart';
 
 class TransactionProvider with ChangeNotifier {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final CategoryProvider categoryProvider;
   List<Transaction> _transactions = [];
   bool _isLoading = false;
   String? _error;
+
+  TransactionProvider({required this.categoryProvider});
 
   List<Transaction> get transactions => _transactions;
   bool get isLoading => _isLoading;
@@ -21,7 +25,12 @@ class TransactionProvider with ChangeNotifier {
   Future<void> loadTransactions() async {
     _setLoading(true);
     try {
-      _transactions = await _databaseHelper.getAllTransactions();
+      final transactionsData = await _databaseHelper.getAllTransactions();
+      // Enrich transactions with category data
+      _transactions = transactionsData.map((tx) {
+        final category = categoryProvider.getCategoryById(tx.categoryId);
+        return tx.copyWith(category: category);
+      }).toList();
       _clearError();
     } catch (e) {
       _setError('Failed to load transactions: $e');
