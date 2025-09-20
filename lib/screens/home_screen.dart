@@ -10,6 +10,7 @@ import 'transaction_list_screen.dart';
 import 'settings_screen.dart';
 import 'dashboard_screen.dart';
 import 'package:intl/intl.dart';
+import '../utils/localization_helper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Family Expenses'),
+        title: Text(LocalizationHelper.getString(context, 'appTitle')),
         elevation: 0,
         actions: [
           // Dashboard
@@ -53,38 +54,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
                       )
                     : Icon(
-                        syncProvider.isOnline
-                            ? Icons.cloud_done
-                            : Icons.cloud_off,
-                        color: syncProvider.isOnline
-                            ? Colors.green
-                            : Colors.orange,
+                        syncProvider.isOnline ? Icons.cloud_done : Icons.cloud_off,
+                        color: syncProvider.isOnline ? Colors.green : Colors.grey,
                       ),
                 onPressed: () {
-                  if (syncProvider.isOnline) {
-                    syncProvider.syncNow();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No internet connection'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
                 },
-              );
-            },
-          ),
-          // Settings
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
@@ -183,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        label: const Text('Add Transaction'),
+        label: Text(LocalizationHelper.getString(context, 'addTransaction')),
         onPressed: () {
           Navigator.push(
             context,

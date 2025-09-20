@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
+import '../utils/localization_helper.dart';
 import '../utils/number_formatter.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -92,7 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: Text(LocalizationHelper.getString(context, 'dashboard')),
         elevation: 0,
         actions: [
           IconButton(

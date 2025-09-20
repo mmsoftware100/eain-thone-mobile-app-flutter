@@ -1,0 +1,322 @@
+{
+  "@@locale": "en",
+  "appTitle": "Family Expenses",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "home": "Home",
+  "@home": {
+    "description": "Home screen title"
+  },
+  
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard screen title"
+  },
+  
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  
+  "transactions": "Transactions",
+  "@transactions": {
+    "description": "Transactions screen title"
+  },
+  
+  "addTransaction": "Add Transaction",
+  "@addTransaction": {
+    "description": "Add transaction button text"
+  },
+  
+  "income": "Income",
+  "@income": {
+    "description": "Income label"
+  },
+  
+  "expense": "Expense",
+  "@expense": {
+    "description": "Expense label"
+  },
+  
+  "expenses": "Expenses",
+  "@expenses": {
+    "description": "Expenses label plural"
+  },
+  
+  "netBalance": "Net Balance",
+  "@netBalance": {
+    "description": "Net balance label"
+  },
+  
+  "thisMonth": "This Month",
+  "@thisMonth": {
+    "description": "This month period label"
+  },
+  
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "This week period label"
+  },
+  
+  "thisYear": "This Year",
+  "@thisYear": {
+    "description": "This year period label"
+  },
+  
+  "lastMonth": "Last Month",
+  "@lastMonth": {
+    "description": "Last month period label"
+  },
+  
+  "lastYear": "Last Year",
+  "@lastYear": {
+    "description": "Last year period label"
+  },
+  
+  "customRange": "Custom Range",
+  "@customRange": {
+    "description": "Custom date range label"
+  },
+  
+  "period": "Period",
+  "@period": {
+    "description": "Period selector label"
+  },
+  
+  "spendingByCategory": "Spending by Category",
+  "@spendingByCategory": {
+    "description": "Spending by category chart title"
+  },
+  
+  "balanceTrend": "Balance Trend",
+  "@balanceTrend": {
+    "description": "Balance trend chart title"
+  },
+  
+  "monthlyComparison": "Monthly Comparison",
+  "@monthlyComparison": {
+    "description": "Monthly comparison chart title"
+  },
+  
+  "noExpenseData": "No expense data available",
+  "@noExpenseData": {
+    "description": "Empty state message for expense chart"
+  },
+  
+  "noTransactionData": "No transaction data available",
+  "@noTransactionData": {
+    "description": "Empty state message for transaction chart"
+  },
+  
+  "noMonthlyData": "No monthly data available",
+  "@noMonthlyData": {
+    "description": "Empty state message for monthly chart"
+  },
+  
+  "selectPeriod": "Select Period",
+  "@selectPeriod": {
+    "description": "Period selector dialog title"
+  },
+  
+  "amount": "Amount",
+  "@amount": {
+    "description": "Amount field label"
+  },
+  
+  "description": "Description",
+  "@description": {
+    "description": "Description field label"
+  },
+  
+  "category": "Category",
+  "@category": {
+    "description": "Category field label"
+  },
+  
+  "date": "Date",
+  "@date": {
+    "description": "Date field label"
+  },
+  
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button text"
+  },
+  
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  
+  "register": "Register",
+  "@register": {
+    "description": "Register button text"
+  },
+  
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  
+  "name": "Name",
+  "@name": {
+    "description": "Name field label"
+  },
+  
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile screen title"
+  },
+  
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+  
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  
+  "myanmar": "Myanmar",
+  "@myanmar": {
+    "description": "Myanmar language option"
+  },
+  
+  "offlineMode": "Offline Mode",
+  "@offlineMode": {
+    "description": "Offline mode label"
+  },
+  
+  "sync": "Sync",
+  "@sync": {
+    "description": "Sync button text"
+  },
+  
+  "syncing": "Syncing...",
+  "@syncing": {
+    "description": "Syncing status text"
+  },
+  
+  "online": "Online",
+  "@online": {
+    "description": "Online status text"
+  },
+  
+  "offline": "Offline",
+  "@offline": {
+    "description": "Offline status text"
+  },
+  
+  "noInternetConnection": "No internet connection",
+  "@noInternetConnection": {
+    "description": "No internet connection message"
+  },
+  
+  "searchTransactions": "Search transactions...",
+  "@searchTransactions": {
+    "description": "Search transactions placeholder"
+  },
+  
+  "allTransactions": "All Transactions",
+  "@allTransactions": {
+    "description": "All transactions filter label"
+  },
+  
+  "incomeOnly": "Income Only",
+  "@incomeOnly": {
+    "description": "Income only filter label"
+  },
+  
+  "expenseOnly": "Expense Only",
+  "@expenseOnly": {
+    "description": "Expense only filter label"
+  },
+  
+  "currentFilter": "Current Filter",
+  "@currentFilter": {
+    "description": "Current filter label for dashboard"
+  },
+  
+  "food": "Food",
+  "@food": {
+    "description": "Food category"
+  },
+  
+  "transport": "Transport",
+  "@transport": {
+    "description": "Transport category"
+  },
+  
+  "shopping": "Shopping",
+  "@shopping": {
+    "description": "Shopping category"
+  },
+  
+  "entertainment": "Entertainment",
+  "@entertainment": {
+    "description": "Entertainment category"
+  },
+  
+  "health": "Health",
+  "@health": {
+    "description": "Health category"
+  },
+  
+  "education": "Education",
+  "@education": {
+    "description": "Education category"
+  },
+  
+  "utilities": "Utilities",
+  "@utilities": {
+    "description": "Utilities category"
+  },
+  
+  "salary": "Salary",
+  "@salary": {
+    "description": "Salary category"
+  },
+  
+  "business": "Business",
+  "@business": {
+    "description": "Business category"
+  },
+  
+  "investment": "Investment",
+  "@investment": {
+    "description": "Investment category"
+  },
+  
+  "other": "Other",
+  "@other": {
+    "description": "Other category"
+  }
+}

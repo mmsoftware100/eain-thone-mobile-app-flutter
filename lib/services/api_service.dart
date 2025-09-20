@@ -8,34 +8,40 @@ class ApiService {
   ApiService._internal();
 
   late Dio _dio;
-  static const String baseUrl = 'https://api.example.com'; // Replace with actual API URL
+  static const String baseUrl =
+      'https://eain-thone-backend-express-typescript.onrender.com'; // Replace with actual API URL
+  // static const String baseUrl = 'https://api.example.com'; // Replace with actual API URL
 
   void initialize() {
-    _dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
 
     // Add interceptors for logging and error handling
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (obj) => print(obj),
-    ));
+    _dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (obj) => print(obj),
+      ),
+    );
 
-    _dio.interceptors.add(InterceptorsWrapper(
-      onError: (error, handler) {
-        // Handle common errors
-        if (error.response?.statusCode == 401) {
-          // Token expired, handle logout
-        }
-        handler.next(error);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (error, handler) {
+          // Handle common errors
+          if (error.response?.statusCode == 401) {
+            // Token expired, handle logout
+          }
+          handler.next(error);
+        },
+      ),
+    );
   }
 
   // Set authorization token
@@ -51,10 +57,10 @@ class ApiService {
   // Authentication endpoints
   Future<ApiResponse<User>> login(String email, String password) async {
     try {
-      final response = await _dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await _dio.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
 
       if (response.statusCode == 200) {
         final user = User.fromJson(response.data['user']);
@@ -70,13 +76,16 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<User>> register(String name, String email, String password) async {
+  Future<ApiResponse<User>> register(
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
-      final response = await _dio.post('/auth/register', data: {
-        'name': name,
-        'email': email,
-        'password': password,
-      });
+      final response = await _dio.post(
+        '/auth/register',
+        data: {'name': name, 'email': email, 'password': password},
+      );
 
       if (response.statusCode == 201) {
         final user = User.fromJson(response.data['user']);
@@ -113,7 +122,9 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['transactions'];
-        final transactions = data.map((json) => Transaction.fromJson(json)).toList();
+        final transactions = data
+            .map((json) => Transaction.fromJson(json))
+            .toList();
         return ApiResponse.success(transactions);
       } else {
         return ApiResponse.error('Failed to fetch transactions');
@@ -125,12 +136,19 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<Transaction>> createTransaction(Transaction transaction) async {
+  Future<ApiResponse<Transaction>> createTransaction(
+    Transaction transaction,
+  ) async {
     try {
-      final response = await _dio.post('/transactions', data: transaction.toJson());
+      final response = await _dio.post(
+        '/transactions',
+        data: transaction.toJson(),
+      );
 
       if (response.statusCode == 201) {
-        final createdTransaction = Transaction.fromJson(response.data['transaction']);
+        final createdTransaction = Transaction.fromJson(
+          response.data['transaction'],
+        );
         return ApiResponse.success(createdTransaction);
       } else {
         return ApiResponse.error('Failed to create transaction');
@@ -142,7 +160,9 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<Transaction>> updateTransaction(Transaction transaction) async {
+  Future<ApiResponse<Transaction>> updateTransaction(
+    Transaction transaction,
+  ) async {
     try {
       final response = await _dio.put(
         '/transactions/${transaction.serverId}',
@@ -150,7 +170,9 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final updatedTransaction = Transaction.fromJson(response.data['transaction']);
+        final updatedTransaction = Transaction.fromJson(
+          response.data['transaction'],
+        );
         return ApiResponse.success(updatedTransaction);
       } else {
         return ApiResponse.error('Failed to update transaction');
@@ -179,11 +201,16 @@ class ApiService {
   }
 
   // Sync endpoints
-  Future<ApiResponse<SyncResponse>> syncTransactions(List<Transaction> localTransactions) async {
+  Future<ApiResponse<SyncResponse>> syncTransactions(
+    List<Transaction> localTransactions,
+  ) async {
     try {
-      final response = await _dio.post('/sync/transactions', data: {
-        'transactions': localTransactions.map((t) => t.toJson()).toList(),
-      });
+      final response = await _dio.post(
+        '/sync/transactions',
+        data: {
+          'transactions': localTransactions.map((t) => t.toJson()).toList(),
+        },
+      );
 
       if (response.statusCode == 200) {
         final syncResponse = SyncResponse.fromJson(response.data);
@@ -218,10 +245,10 @@ class ApiService {
 
   Future<ApiResponse<User>> updateUserProfile(String name, String email) async {
     try {
-      final response = await _dio.put('/user/profile', data: {
-        'name': name,
-        'email': email,
-      });
+      final response = await _dio.put(
+        '/user/profile',
+        data: {'name': name, 'email': email},
+      );
 
       if (response.statusCode == 200) {
         final user = User.fromJson(response.data['user']);

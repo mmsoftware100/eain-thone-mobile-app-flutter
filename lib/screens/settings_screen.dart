@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/sync_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/language_provider.dart';
+import '../utils/localization_helper.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -9,30 +11,61 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        elevation: 0,
-      ),
-      body: Consumer2<SyncProvider, TransactionProvider>(
-        builder: (context, syncProvider, transactionProvider, child) {
+      appBar: AppBar(title: Text(LocalizationHelper.getString(context, 'settings')), elevation: 0),
+      body: Consumer3<SyncProvider, TransactionProvider, LanguageProvider>(
+        builder: (context, syncProvider, transactionProvider, languageProvider, child) {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
+              // Language Settings Section
+              _buildSectionHeader(context, LocalizationHelper.getString(context, 'language')),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.language),
+                      title: Text(LocalizationHelper.getString(context, 'language')),
+                      subtitle: Text(languageProvider.isEnglish 
+                        ? LocalizationHelper.getString(context, 'english')
+                        : LocalizationHelper.getString(context, 'myanmar')),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        _showLanguageDialog(context, languageProvider);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
               // Sync Settings Section
+              ListTile(
+                title: Text(LocalizationHelper.getString(context, 'login')),
+                onTap: () {
+                  // navigate to login page
+                  Navigator.pushNamed(context, '/login');
+                },
+              ),
               _buildSectionHeader(context, 'Sync Settings'),
               Card(
                 child: Column(
                   children: [
                     ListTile(
                       leading: Icon(
-                        syncProvider.isOnline ? Icons.cloud_done : Icons.cloud_off,
-                        color: syncProvider.isOnline ? Colors.green : Colors.grey,
+                        syncProvider.isOnline
+                            ? Icons.cloud_done
+                            : Icons.cloud_off,
+                        color: syncProvider.isOnline
+                            ? Colors.green
+                            : Colors.grey,
                       ),
                       title: const Text('Connection Status'),
                       subtitle: Text(
                         syncProvider.isOnline ? 'Online' : 'Offline',
                         style: TextStyle(
-                          color: syncProvider.isOnline ? Colors.green : Colors.grey,
+                          color: syncProvider.isOnline
+                              ? Colors.green
+                              : Colors.grey,
                         ),
                       ),
                       trailing: syncProvider.isSyncing
@@ -57,7 +90,9 @@ class SettingsScreen extends StatelessWidget {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Sync completed successfully'),
+                                      content: Text(
+                                        'Sync completed successfully',
+                                      ),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
@@ -109,7 +144,9 @@ class SettingsScreen extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.refresh),
                       title: const Text('Refresh Data'),
-                      subtitle: const Text('Reload transactions from local storage'),
+                      subtitle: const Text(
+                        'Reload transactions from local storage',
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
                         await transactionProvider.refreshTransactions();
@@ -124,7 +161,10 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const Divider(height: 1),
                     ListTile(
-                      leading: const Icon(Icons.delete_sweep, color: Colors.red),
+                      leading: const Icon(
+                        Icons.delete_sweep,
+                        color: Colors.red,
+                      ),
                       title: const Text('Clear All Data'),
                       subtitle: const Text('Delete all local transactions'),
                       trailing: const Icon(Icons.chevron_right),
@@ -284,7 +324,10 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showClearDataDialog(BuildContext context, TransactionProvider provider) {
+  void _showClearDataDialog(
+    BuildContext context,
+    TransactionProvider provider,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -309,6 +352,63 @@ class SettingsScreen extends StatelessWidget {
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete All'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(
+    BuildContext context,
+    LanguageProvider languageProvider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Radio<String>(
+                value: 'en',
+                groupValue: languageProvider.currentLocale.languageCode,
+                onChanged: (value) {
+                  if (value != null) {
+                    languageProvider.changeLanguage(value);
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              title: const Text('English'),
+              onTap: () {
+                languageProvider.changeLanguage('en');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Radio<String>(
+                value: 'my',
+                groupValue: languageProvider.currentLocale.languageCode,
+                onChanged: (value) {
+                  if (value != null) {
+                    languageProvider.changeLanguage(value);
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              title: const Text('မြန်မာ'),
+              onTap: () {
+                languageProvider.changeLanguage('my');
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
         ],
       ),

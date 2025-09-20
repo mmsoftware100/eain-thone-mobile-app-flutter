@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
+import '../models/transaction.dart';
 import '../utils/number_formatter.dart';
+import '../utils/localization_helper.dart';
 import 'transaction_detail_screen.dart';
 import 'transaction_form_screen.dart';
 
@@ -486,7 +487,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: FilterChip(
-                      label: const Text('Income'),
+                      label: Text(LocalizationHelper.getString(context, 'income')),
                       selected: _selectedType == TransactionType.income,
                       onSelected: (selected) {
                         setModalState(() {
@@ -498,7 +499,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: FilterChip(
-                      label: const Text('Expense'),
+                      label: Text(LocalizationHelper.getString(context, 'expense')),
                       selected: _selectedType == TransactionType.expense,
                       onSelected: (selected) {
                         setModalState(() {

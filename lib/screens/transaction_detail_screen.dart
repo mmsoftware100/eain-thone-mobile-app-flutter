@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/number_formatter.dart';
+import '../utils/localization_helper.dart';
 import 'transaction_form_screen.dart';
 
 class TransactionDetailScreen extends StatefulWidget {

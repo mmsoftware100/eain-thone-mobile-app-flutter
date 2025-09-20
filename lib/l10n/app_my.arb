@@ -1,0 +1,130 @@
+{
+  "@@locale": "my",
+  "appTitle": "မိသားစု ကုန်ကျစရိတ်",
+  
+  "home": "ပင်မ",
+  
+  "dashboard": "ဒက်ရှ်ဘုတ်",
+  
+  "settings": "ဆက်တင်များ",
+  
+  "transactions": "ငွေလွှဲပြောင်းမှုများ",
+  
+  "addTransaction": "ငွေလွှဲပြောင်းမှု ထည့်ရန်",
+  
+  "income": "ဝင်ငွေ",
+  
+  "expense": "ကုန်ကျစရိတ်",
+  
+  "expenses": "ကုန်ကျစရိတ်များ",
+  
+  "netBalance": "စုစုပေါင်း လက်ကျန်",
+  
+  "thisMonth": "ဒီလ",
+  
+  "thisWeek": "ဒီအပတ်",
+  
+  "thisYear": "ဒီနှစ်",
+  
+  "lastMonth": "ပြီးခဲ့သောလ",
+  
+  "lastYear": "ပြီးခဲ့သောနှစ်",
+  
+  "customRange": "စိတ်ကြိုက် ကာလ",
+  
+  "period": "ကာလ",
+  
+  "spendingByCategory": "အမျိုးအစား အလိုက် သုံးစွဲမှု",
+  
+  "balanceTrend": "လက်ကျန် ခြေရာ",
+  
+  "monthlyComparison": "လစဉ် နှိုင်းယှဉ်မှု",
+  
+  "noExpenseData": "ကုန်ကျစရိတ် အချက်အလက် မရှိပါ",
+  
+  "noTransactionData": "ငွေလွှဲပြောင်းမှု အချက်အလက် မရှိပါ",
+  
+  "noMonthlyData": "လစဉ် အချက်အလက် မရှိပါ",
+  
+  "selectPeriod": "ကာလ ရွေးချယ်ရန်",
+  
+  "amount": "ပမာណ",
+  
+  "description": "ဖော်ပြချက်",
+  
+  "category": "အမျိုးအစား",
+  
+  "date": "ရက်စွဲ",
+  
+  "save": "သိမ်းဆည်းရန်",
+  
+  "cancel": "ပယ်ဖျက်ရန်",
+  
+  "delete": "ဖျက်ရန်",
+  
+  "edit": "တည်းဖြတ်ရန်",
+  
+  "login": "ဝင်ရောက်ရန်",
+  
+  "register": "မှတ်ပုံတင်ရန်",
+  
+  "logout": "ထွက်ရန်",
+  
+  "email": "အီးမေးလ်",
+  
+  "password": "စကားဝှက်",
+  
+  "name": "အမည်",
+  
+  "profile": "ပရိုဖိုင်",
+  
+  "language": "ဘာသာစကား",
+  
+  "english": "အင်္ဂလိပ်",
+  
+  "myanmar": "မြန်မာ",
+  
+  "offlineMode": "အော့ဖ်လိုင်း မုဒ်",
+  
+  "sync": "ထပ်တူကျစေရန်",
+  
+  "syncing": "ထပ်တူကျစေနေသည်...",
+  
+  "online": "အွန်လိုင်း",
+  
+  "offline": "အော့ဖ်လိုင်း",
+  
+  "noInternetConnection": "အင်တာနက် ချိတ်ဆက်မှု မရှိပါ",
+  
+  "searchTransactions": "ငွေလွှဲပြောင်းမှုများ ရှာဖွေရန်...",
+  
+  "allTransactions": "ငွေလွှဲပြောင်းမှု အားလုံး",
+  
+  "incomeOnly": "ဝင်ငွေ သာ",
+  
+  "expenseOnly": "ကုန်ကျစရိတ် သာ",
+  
+  "currentFilter": "လက်ရှိ စစ်ထုတ်မှု",
+  
+  "food": "အစားအသောက်",
+  
+  "transport": "သယ်ယူပို့ဆောင်ရေး",
+  
+  "shopping": "ဈေးဝယ်ခြင်း",
+  
+  "entertainment": "ဖျော်ဖြေရေး",
+  
+  "health": "ကျန်းမာရေး",
+  
+  "education": "ပညာရေး",
+  
+  "utilities": "အသုံးအဆောင်များ",
+  
+  "salary": "လစာ",
+  
+  "business": "စီးပွားရေး",
+  
+  "investment": "ရင်းနှီးမြှုပ်နှံမှု",
+  
+  "other": "အခြား"
+}

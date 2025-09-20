@@ -91,3 +91,11 @@ so user can get insight of their spending and income trends.
 ## Multiple Language 
 - [ ] Myanmar 
 - [ ] English
+
+
+## Update Icon and Splash Screen
+
+- [ ] app name
+- [ ] app icon
+- [ ] splash screen
+- [ ] demo introduction
