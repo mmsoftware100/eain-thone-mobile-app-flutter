@@ -72,7 +72,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id']?.toInt(),
+      id: json['_id'] != null ? json['_id'].hashCode : json['id']?.toInt(),
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       token: json['token'],

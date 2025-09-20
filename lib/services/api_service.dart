@@ -62,13 +62,28 @@ class ApiService {
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        final user = User.fromJson(response.data['data']['user']);
-        setAuthToken(response.data['data']['token']);
+        // Create user from the data object and add the token from root level
+        final userData = Map<String, dynamic>.from(response.data['data']);
+        userData['token'] = response.data['token']; // Add token from root level
+        
+        final user = User.fromJson(userData);
+        setAuthToken(response.data['token']); // Set token from root level
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error(response.data['message'] ?? 'Login failed');
+        // Handle error response from server
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Login failed';
+        return ApiResponse.error(errorMessage);
       }
     } on DioException catch (e) {
+      // Handle HTTP errors and extract server error messages
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
       return ApiResponse.error('Unexpected error: $e');
@@ -87,8 +102,12 @@ class ApiService {
       );
 
       if (response.statusCode == 201 && response.data['success'] == true) {
-        final user = User.fromJson(response.data['data']['user']);
-        setAuthToken(response.data['data']['token']);
+        // Create user from the data object and add the token from root level
+        final userData = Map<String, dynamic>.from(response.data['data']);
+        userData['token'] = response.data['token']; // Add token from root level
+        
+        final user = User.fromJson(userData);
+        setAuthToken(response.data['token']); // Set token from root level
         return ApiResponse.success(user);
       } else {
         return ApiResponse.error(response.data['message'] ?? 'Registration failed');
