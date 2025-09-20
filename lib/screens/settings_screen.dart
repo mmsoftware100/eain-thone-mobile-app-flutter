@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/sync_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/language_provider.dart';
+import '../providers/auth_provider.dart';
 import '../utils/localization_helper.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -12,8 +13,8 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(LocalizationHelper.getString(context, 'settings')), elevation: 0),
-      body: Consumer3<SyncProvider, TransactionProvider, LanguageProvider>(
-        builder: (context, syncProvider, transactionProvider, languageProvider, child) {
+      body: Consumer4<SyncProvider, TransactionProvider, LanguageProvider, AuthProvider>(
+        builder: (context, syncProvider, transactionProvider, languageProvider, authProvider, child) {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
@@ -38,14 +39,53 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Sync Settings Section
-              ListTile(
-                title: Text(LocalizationHelper.getString(context, 'login')),
-                onTap: () {
-                  // navigate to login page
-                  Navigator.pushNamed(context, '/login');
-                },
+              // Authentication Section
+              _buildSectionHeader(context, LocalizationHelper.getString(context, 'account')),
+              Card(
+                child: Column(
+                  children: [
+                    if (!authProvider.isAuthenticated) ...[
+                      ListTile(
+                        leading: const Icon(Icons.login, color: Colors.blue),
+                        title: Text(LocalizationHelper.getString(context, 'login')),
+                        subtitle: Text(LocalizationHelper.getString(context, 'loginToSync')),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                      ),
+                    ] else ...[
+                      ListTile(
+                        leading: const Icon(Icons.account_circle, color: Colors.green),
+                        title: Text(authProvider.user?.name ?? 'User'),
+                        subtitle: Text(authProvider.user?.email ?? ''),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          // Navigate to profile screen if needed
+                        },
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.logout, color: Colors.red),
+                        title: Text(LocalizationHelper.getString(context, 'logout')),
+                        onTap: () async {
+                          await authProvider.logout();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(LocalizationHelper.getString(context, 'loggedOut')),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ],
+                ),
               ),
+              const SizedBox(height: 24),
+
+              // Sync Settings Section
               _buildSectionHeader(context, 'Sync Settings'),
               Card(
                 child: Column(
