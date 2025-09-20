@@ -20,6 +20,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
+  final _amountFocusNode = FocusNode();
   
   TransactionType _selectedType = TransactionType.expense;
   String _selectedCategory = 'Food';
@@ -59,6 +60,11 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       _selectedType = widget.transaction!.type;
       _selectedCategory = widget.transaction!.category;
       _selectedDate = widget.transaction!.date;
+    } else {
+      // For new transactions, auto-focus the amount field
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _amountFocusNode.requestFocus();
+      });
     }
   }
 
@@ -66,6 +72,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   void dispose() {
     _descriptionController.dispose();
     _amountController.dispose();
+    _amountFocusNode.dispose();
     super.dispose();
   }
 
@@ -187,14 +194,15 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
-                            controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: primaryColor,
-                            ),
+                             controller: _amountController,
+                             focusNode: _amountFocusNode,
+                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                             textAlign: TextAlign.center,
+                             style: TextStyle(
+                               fontSize: 36,
+                               fontWeight: FontWeight.bold,
+                               color: primaryColor,
+                             ),
                             decoration: InputDecoration(
                               hintText: '0.00',
                               hintStyle: TextStyle(
