@@ -162,3 +162,37 @@ extension TransactionTypeExtension on TransactionType {
     }
   }
 }
+
+class TransactionListResponse {
+  final List<Transaction> transactions;
+  final int totalCount;
+  final int currentPage;
+  final int totalPages;
+
+  TransactionListResponse({
+    required this.transactions,
+    required this.totalCount,
+    required this.currentPage,
+    required this.totalPages,
+  });
+
+  factory TransactionListResponse.fromJson(Map<String, dynamic> json) {
+    return TransactionListResponse(
+      transactions: (json['data'] as List<dynamic>? ?? [])
+          .map((e) => Transaction.fromJson(e))
+          .toList(),
+      totalCount: json['totalCount'] ?? 0,
+      currentPage: json['currentPage'] ?? 1,
+      totalPages: json['totalPages'] ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': transactions.map((e) => e.toJson()).toList(),
+      'totalCount': totalCount,
+      'currentPage': currentPage,
+      'totalPages': totalPages,
+    };
+  }
+}

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import '../models/user.dart';
 import '../models/transaction.dart';
+import '../models/analytics.dart';
+import '../models/sync.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -54,31 +56,25 @@ class ApiService {
   }
 
   // Authentication endpoints
-  Future<ApiResponse<User>> login(String email, String password) async {
+  Future<ApiResponse<Map<String, dynamic>>> login(String email, String password) async {
     try {
-      final response = await _dio.post(
-        '/auth/login',
-        data: {'email': email, 'password': password},
-      );
+      final response = await _dio.post('/auth/login', data: {
+        'email': email,
+        'password': password,
+      });
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        // Create user from the data object and add the token from root level
-        final userData = Map<String, dynamic>.from(response.data['data']);
-        userData['token'] = response.data['token']; // Add token from root level
-        
-        final user = User.fromJson(userData);
-        setAuthToken(response.data['token']); // Set token from root level
-        return ApiResponse.success(user);
+        return ApiResponse.success(response.data['data']);
       } else {
-        // Handle error response from server
+        // Check for error field first, then message field
         final errorMessage = response.data['error'] ?? 
                            response.data['message'] ?? 
                            'Login failed';
         return ApiResponse.error(errorMessage);
       }
     } on DioException catch (e) {
-      // Handle HTTP errors and extract server error messages
       if (e.response?.data != null) {
+        // Check for error field first, then message field in error response
         final errorMessage = e.response!.data['error'] ?? 
                            e.response!.data['message'] ?? 
                            _handleDioError(e);
@@ -90,35 +86,26 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<User>> register(
-    String name,
-    String email,
-    String password,
-  ) async {
+  Future<ApiResponse<Map<String, dynamic>>> register(String email, String password, String name) async {
     try {
-      final response = await _dio.post(
-        '/auth/register',
-        data: {'name': name, 'email': email, 'password': password},
-      );
+      final response = await _dio.post('/auth/register', data: {
+        'email': email,
+        'password': password,
+        'name': name,
+      });
 
       if (response.statusCode == 201 && response.data['success'] == true) {
-        // Create user from the data object and add the token from root level
-        final userData = Map<String, dynamic>.from(response.data['data']);
-        userData['token'] = response.data['token']; // Add token from root level
-        
-        final user = User.fromJson(userData);
-        setAuthToken(response.data['token']); // Set token from root level
-        return ApiResponse.success(user);
+        return ApiResponse.success(response.data['data']);
       } else {
-        // Handle error response from server
+        // Check for error field first, then message field
         final errorMessage = response.data['error'] ?? 
                            response.data['message'] ?? 
                            'Registration failed';
         return ApiResponse.error(errorMessage);
       }
     } on DioException catch (e) {
-      // Handle HTTP errors and extract server error messages
       if (e.response?.data != null) {
+        // Check for error field first, then message field in error response
         final errorMessage = e.response!.data['error'] ?? 
                            e.response!.data['message'] ?? 
                            _handleDioError(e);
@@ -132,20 +119,128 @@ class ApiService {
 
   Future<ApiResponse<void>> logout() async {
     try {
-      await _dio.post('/auth/logout');
-      clearAuthToken();
-      return ApiResponse.success(null);
+      final response = await _dio.post('/auth/logout');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return ApiResponse.success(null);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Logout failed';
+        return ApiResponse.error(errorMessage);
+      }
     } on DioException catch (e) {
-      clearAuthToken(); // Clear token even if logout fails
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
-      clearAuthToken();
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<void>> refreshToken() async {
+    try {
+      final response = await _dio.post('/auth/refresh');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        // Update the token if provided in response
+        if (response.data['data']?['token'] != null) {
+          setAuthToken(response.data['data']['token']);
+        }
+        return ApiResponse.success(null);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Token refresh failed';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
       return ApiResponse.error('Unexpected error: $e');
     }
   }
 
   // Transaction endpoints
-  Future<ApiResponse<List<Transaction>>> getTransactions() async {
+  Future<ApiResponse<TransactionListResponse>> getTransactions({
+    int page = 1,
+    int limit = 10,
+    String? category,
+    String? type,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+      };
+      
+      if (category != null) queryParams['category'] = category;
+      if (type != null) queryParams['type'] = type;
+
+      final response = await _dio.get(
+        '/transactions',
+        queryParameters: queryParams,
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final listResponse = TransactionListResponse.fromJson(response.data);
+        return ApiResponse.success(listResponse);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch transactions';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<Transaction>> getTransactionById(String id) async {
+    try {
+      final response = await _dio.get('/transactions/$id');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final transaction = Transaction.fromJson(response.data['data']);
+        return ApiResponse.success(transaction);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Transaction not found';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<List<Transaction>>> getTransactionsSimple() async {
     try {
       final response = await _dio.get('/transactions');
 
@@ -230,6 +325,124 @@ class ApiService {
   }
 
   // Sync endpoints
+  Future<ApiResponse<BulkSyncResponse>> bulkSyncTransactions(
+    List<Transaction> transactions,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/sync/bulk',
+        data: {
+          'transactions': transactions.map((t) => t.toJson()).toList(),
+        },
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final bulkResponse = BulkSyncResponse.fromJson(response.data['data']);
+        return ApiResponse.success(bulkResponse);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Bulk sync failed';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<List<Transaction>>> getUnsyncedTransactions() async {
+    try {
+      final response = await _dio.get('/sync/unsynced');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List<dynamic> data = response.data['data'];
+        final transactions = data
+            .map((json) => Transaction.fromJson(json))
+            .toList();
+        return ApiResponse.success(transactions);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch unsynced transactions';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<void>> markTransactionsSynced(
+    List<String> transactionIds,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/sync/mark-synced',
+        data: {'transactionIds': transactionIds},
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return ApiResponse.success(null);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to mark transactions as synced';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<SyncStatus>> getSyncStatus() async {
+    try {
+      final response = await _dio.get('/sync/status');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final status = SyncStatus.fromJson(response.data['data']);
+        return ApiResponse.success(status);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch sync status';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
   Future<ApiResponse<SyncResponse>> syncTransactions(
     List<Transaction> localTransactions,
   ) async {
@@ -248,6 +461,91 @@ class ApiService {
         return ApiResponse.error('Sync failed');
       }
     } on DioException catch (e) {
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  // Analytics endpoints
+  Future<ApiResponse<FinancialSummary>> getFinancialSummary() async {
+    try {
+      final response = await _dio.get('/analytics/summary');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final summary = FinancialSummary.fromJson(response.data['data']);
+        return ApiResponse.success(summary);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch financial summary';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<List<CategoryBreakdownItem>>> getCategoryBreakdown() async {
+    try {
+      final response = await _dio.get('/analytics/category-breakdown');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List<dynamic> data = response.data['data'];
+        final breakdown = data
+            .map((json) => CategoryBreakdownItem.fromJson(json))
+            .toList();
+        return ApiResponse.success(breakdown);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch category breakdown';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
+      return ApiResponse.error(_handleDioError(e));
+    } catch (e) {
+      return ApiResponse.error('Unexpected error: $e');
+    }
+  }
+
+  Future<ApiResponse<List<MonthlyTrendItem>>> getMonthlyTrends() async {
+    try {
+      final response = await _dio.get('/analytics/monthly-trends');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List<dynamic> data = response.data['data'];
+        final trends = data
+            .map((json) => MonthlyTrendItem.fromJson(json))
+            .toList();
+        return ApiResponse.success(trends);
+      } else {
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch monthly trends';
+        return ApiResponse.error(errorMessage);
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
       return ApiResponse.error('Unexpected error: $e');

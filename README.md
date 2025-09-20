@@ -51,7 +51,7 @@ When start app
 - [ ] new user should show Login Page 
 - [ ] if user is alredy decide to use offline first , show direct Home Page
 
-Transaction Form Screen
+Transaction Form Screensdf
 
 - [ ] first show big text area input for description
 - [ ] then show number input for amount
@@ -91,6 +91,7 @@ so user can get insight of their spending and income trends.
 ## Multiple Language 
 - [ ] Myanmar 
 - [ ] English
+- [ ] transalte all the static text in the app , like button label, text , etc
 
 
 ## Update Icon and Splash Screen
@@ -99,3 +100,10 @@ so user can get insight of their spending and income trends.
 - [ ] app icon
 - [ ] splash screen
 - [ ] demo introduction
+
+
+## in home page, Instead of FAB, create call to action button below summary cards, so user can easily add new transaction.
+
+the main work is see balance, and add new transaction.
+so user scan the page and know what they are looking for and do what they want to do quicky, without thinking too much, just scan and do.
+

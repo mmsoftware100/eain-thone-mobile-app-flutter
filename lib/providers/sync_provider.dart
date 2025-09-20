@@ -1,14 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../services/api_service.dart';
 import 'dart:async';
 
 class SyncProvider with ChangeNotifier {
+  final ApiService _apiService = ApiService();
+  
   bool _isOnline = false;
   bool _isSyncing = false;
   bool _autoSyncEnabled = true;
   String? _syncError;
   DateTime? _lastSyncTime;
   Timer? _syncTimer;
+  Timer? _connectivityTimer;
 
   // Getters
   bool get isOnline => _isOnline;
@@ -31,33 +35,77 @@ class SyncProvider with ChangeNotifier {
     return 'Never synced';
   }
 
-  // Initialize connectivity monitoring
-  Future<void> initialize() async {
-    // Check initial connectivity
-    final connectivityResult = await Connectivity().checkConnectivity();
-    _updateConnectivity(connectivityResult);
-
-    // Listen for connectivity changes
-    Connectivity().onConnectivityChanged.listen(_updateConnectivity);
-
-    // Start periodic sync when online
+  SyncProvider() {
+    _initConnectivity();
     _startPeriodicSync();
+    _startConnectivityCheck();
   }
 
-  void _updateConnectivity(List<ConnectivityResult> results) {
-    final wasOnline = _isOnline;
-    _isOnline = results.any((result) => 
+  // Initialize connectivity monitoring
+  Future<void> _initConnectivity() async {
+    final connectivity = Connectivity();
+    
+    // Check initial connectivity
+    final results = await connectivity.checkConnectivity();
+    await _updateConnectivity(results);
+    
+    // Listen for connectivity changes
+    connectivity.onConnectivityChanged.listen(_updateConnectivity);
+  }
+
+  // Update connectivity status with real network test
+  Future<void> _updateConnectivity(List<ConnectivityResult> results) async {
+    final hasNetworkInterface = results.any((result) => 
       result == ConnectivityResult.mobile || 
       result == ConnectivityResult.wifi ||
       result == ConnectivityResult.ethernet
     );
     
-    if (!wasOnline && _isOnline) {
-      // Just came online, trigger sync
-      _triggerSync();
+    if (hasNetworkInterface) {
+      // Test real connectivity by pinging the server
+      await _testRealConnectivity();
+    } else {
+      final wasOnline = _isOnline;
+      _isOnline = false;
+      if (wasOnline) {
+        notifyListeners();
+      }
     }
-    
-    notifyListeners();
+  }
+
+  // Test real connectivity by attempting to reach the server
+  Future<void> _testRealConnectivity() async {
+    try {
+      // Try to get sync status from server with a short timeout
+      await _apiService.getSyncStatus().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('Connection timeout'),
+      );
+      
+      final wasOnline = _isOnline;
+      _isOnline = true;
+      
+      if (!wasOnline) {
+        // Just came online, trigger sync
+        _triggerSync();
+        notifyListeners();
+      }
+    } catch (e) {
+      final wasOnline = _isOnline;
+      _isOnline = false;
+      
+      if (wasOnline) {
+        notifyListeners();
+      }
+    }
+  }
+
+  // Start periodic connectivity check every 30 seconds
+  void _startConnectivityCheck() {
+    _connectivityTimer?.cancel();
+    _connectivityTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      _testRealConnectivity();
+    });
   }
 
   // Start periodic sync every 5 minutes when online
@@ -196,6 +244,7 @@ class SyncProvider with ChangeNotifier {
   @override
   void dispose() {
     _syncTimer?.cancel();
+    _connectivityTimer?.cancel();
     super.dispose();
   }
 }

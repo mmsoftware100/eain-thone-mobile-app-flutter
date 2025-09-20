@@ -40,7 +40,15 @@ class AuthProvider with ChangeNotifier {
       final response = await _apiService.login(email, password);
       
       if (response.success && response.data != null) {
-        final user = response.data!;
+        final userData = response.data!;
+        
+        // Create User object from the response data
+        final user = User.fromJson(userData);
+        
+        // Set auth token if provided
+        if (userData['token'] != null) {
+          _apiService.setAuthToken(userData['token']);
+        }
         
         // Save user to local database
         await _databaseHelper.deleteUser(); // Clear existing user
@@ -67,10 +75,18 @@ class AuthProvider with ChangeNotifier {
     _setLoading(true);
     try {
       // Call real API
-      final response = await _apiService.register(name, email, password);
+      final response = await _apiService.register(email, password, name);
       
       if (response.success && response.data != null) {
-        final user = response.data!;
+        final userData = response.data!;
+        
+        // Create User object from the response data
+        final user = User.fromJson(userData);
+        
+        // Set auth token if provided
+        if (userData['token'] != null) {
+          _apiService.setAuthToken(userData['token']);
+        }
         
         // Save user to local database
         await _databaseHelper.deleteUser(); // Clear existing user
