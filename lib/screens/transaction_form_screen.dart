@@ -106,7 +106,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
         }
 
         if (mounted) {
-          Navigator.pop(context);
+          Navigator.pop(context, transaction);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(

@@ -3,7 +3,7 @@ import '../models/transaction.dart';
 import 'transaction_form_screen.dart';
 import 'package:intl/intl.dart';
 
-class TransactionDetailScreen extends StatelessWidget {
+class TransactionDetailScreen extends StatefulWidget {
   final Transaction transaction;
 
   const TransactionDetailScreen({
@@ -12,8 +12,38 @@ class TransactionDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<TransactionDetailScreen> createState() => _TransactionDetailScreenState();
+}
+
+class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
+  late Transaction currentTransaction;
+
+  @override
+  void initState() {
+    super.initState();
+    currentTransaction = widget.transaction;
+  }
+
+  Future<void> _navigateToEdit() async {
+    final result = await Navigator.push<Transaction>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TransactionFormScreen(
+          transaction: currentTransaction,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        currentTransaction = result;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isIncome = transaction.type == TransactionType.income;
+    final isIncome = currentTransaction.type == TransactionType.income;
     
     return Scaffold(
       appBar: AppBar(
@@ -22,16 +52,7 @@ class TransactionDetailScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TransactionFormScreen(
-                    transaction: transaction,
-                  ),
-                ),
-              );
-            },
+            onPressed: _navigateToEdit,
           ),
         ],
       ),
@@ -55,7 +76,7 @@ class TransactionDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                      '${isIncome ? '+' : '-'}\$${currentTransaction.amount.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isIncome ? Colors.green[700] : Colors.red[700],
@@ -63,7 +84,7 @@ class TransactionDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      transaction.type.displayName,
+                      currentTransaction.type.displayName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: isIncome ? Colors.green[600] : Colors.red[600],
                       ),
@@ -82,22 +103,22 @@ class TransactionDetailScreen extends StatelessWidget {
                 _DetailItem(
                   icon: Icons.description,
                   label: 'Description',
-                  value: transaction.description,
+                  value: currentTransaction.description,
                 ),
                 _DetailItem(
                   icon: Icons.category,
                   label: 'Category',
-                  value: transaction.category,
+                  value: currentTransaction.category,
                 ),
                 _DetailItem(
                   icon: Icons.calendar_today,
                   label: 'Date',
-                  value: DateFormat('EEEE, MMM dd, yyyy').format(transaction.date),
+                  value: DateFormat('EEEE, MMM dd, yyyy').format(currentTransaction.date),
                 ),
                 _DetailItem(
                   icon: Icons.access_time,
                   label: 'Time',
-                  value: DateFormat('hh:mm a').format(transaction.date),
+                  value: DateFormat('hh:mm a').format(currentTransaction.date),
                 ),
               ],
             ),
@@ -109,20 +130,20 @@ class TransactionDetailScreen extends StatelessWidget {
               'Sync Status',
               [
                 _DetailItem(
-                  icon: transaction.isSynced ? Icons.cloud_done : Icons.sync_disabled,
+                  icon: currentTransaction.isSynced ? Icons.cloud_done : Icons.sync_disabled,
                   label: 'Status',
-                  value: transaction.isSynced ? 'Synced' : 'Not Synced',
-                  valueColor: transaction.isSynced ? Colors.green : Colors.orange,
+                  value: currentTransaction.isSynced ? 'Synced' : 'Not Synced',
+                  valueColor: currentTransaction.isSynced ? Colors.green : Colors.orange,
                 ),
                 _DetailItem(
                   icon: Icons.schedule,
                   label: 'Created',
-                  value: DateFormat('MMM dd, yyyy at hh:mm a').format(transaction.createdAt),
+                  value: DateFormat('MMM dd, yyyy at hh:mm a').format(currentTransaction.createdAt),
                 ),
                 _DetailItem(
                   icon: Icons.update,
                   label: 'Last Updated',
-                  value: DateFormat('MMM dd, yyyy at hh:mm a').format(transaction.updatedAt),
+                  value: DateFormat('MMM dd, yyyy at hh:mm a').format(currentTransaction.updatedAt),
                 ),
               ],
             ),
@@ -133,16 +154,7 @@ class TransactionDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TransactionFormScreen(
-                            transaction: transaction,
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: _navigateToEdit,
                     icon: const Icon(Icons.edit),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(

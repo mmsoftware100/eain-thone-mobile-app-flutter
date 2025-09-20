@@ -77,3 +77,7 @@ User Registration / Login Flow from Home Page
 - [ ] Transaction Detail Screen's should able to swipe left / right to see previous / next transaction on the whold card / page 
 - [ ] add category management ? user can add / edit / delete category , and use in transaction form, offline first, sync also.
 
+
+
+## Net Balcne show in full width
+

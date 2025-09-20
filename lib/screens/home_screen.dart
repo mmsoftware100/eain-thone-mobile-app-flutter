@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/transaction_provider.dart';
-import '../providers/auth_provider.dart';
 import '../providers/sync_provider.dart';
 import '../models/transaction.dart';
 import 'transaction_form_screen.dart';
@@ -73,9 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
@@ -103,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _buildSummaryCards(transactionProvider),
                   ),
                 ),
-                
+
                 // Recent Transactions Header
                 SliverToBoxAdapter(
                   child: Padding(
@@ -113,16 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text(
                           'Recent Transactions',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const TransactionListScreen(),
+                                builder: (context) =>
+                                    const TransactionListScreen(),
                               ),
                             );
                           },
@@ -148,29 +145,25 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 16),
                               Text(
                                 'No transactions yet',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(color: Colors.grey[600]),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Tap the + button to add your first expense',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[500],
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: Colors.grey[500]),
                               ),
                             ],
                           ),
                         ),
                       )
                     : SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final transaction = transactionProvider.transactions[index];
-                            return _buildTransactionTile(transaction);
-                          },
-                          childCount: transactionProvider.transactions.length,
-                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final transaction =
+                              transactionProvider.transactions[index];
+                          return _buildTransactionTile(transaction);
+                        }, childCount: transactionProvider.transactions.length),
                       ),
               ],
             ),
@@ -193,45 +186,52 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSummaryCards(TransactionProvider provider) {
     final summary = provider.getMonthlySummary();
-    
+
     return Column(
       children: [
         // Total Balance Card
-        Card(
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Text(
-                  'This Month',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey[600],
+        SizedBox(
+          width: double.infinity,
+          child: Card(
+            // update color based on value , if balance plus show positive color , if negative show red
+            color: (summary['income']! - summary['expense']!) >= 0
+                ? Colors.green[50]
+                : Colors.red[50],
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Text(
+                    'This Month',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '\$${(summary['income']! - summary['expense']!).toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: (summary['income']! - summary['expense']!) >= 0
-                        ? Colors.green
-                        : Colors.red,
+                  const SizedBox(height: 8),
+                  Text(
+                    '\$${(summary['income']! - summary['expense']!).toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: (summary['income']! - summary['expense']!) >= 0
+                          ? Colors.green
+                          : Colors.red,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Net Balance',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[500],
+                  const SizedBox(height: 4),
+                  Text(
+                    'Net Balance',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Income and Expense Cards
         Row(
           children: [
@@ -289,9 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Text(
                         'Expenses',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.red[600],
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.red[600]),
                       ),
                     ],
                   ),
@@ -306,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTransactionTile(Transaction transaction) {
     final isIncome = transaction.type == TransactionType.income;
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
@@ -327,10 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(transaction.category),
             Text(
               DateFormat('MMM dd, yyyy').format(transaction.date),
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],
         ),
@@ -347,20 +344,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             if (!transaction.isSynced)
-              Icon(
-                Icons.sync_disabled,
-                size: 16,
-                color: Colors.orange[600],
-              ),
+              Icon(Icons.sync_disabled, size: 16, color: Colors.orange[600]),
           ],
         ),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TransactionDetailScreen(
-                transaction: transaction,
-              ),
+              builder: (context) =>
+                  TransactionDetailScreen(transaction: transaction),
             ),
           );
         },
