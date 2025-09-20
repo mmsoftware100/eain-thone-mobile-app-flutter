@@ -86,3 +86,8 @@ User Registration / Login Flow from Home Page
 that show filtered date rage / month / year summary , and also show net balance, 
 trends with bar charts, line charts 
 so user can get insight of their spending and income trends.
+
+
+## Multiple Language 
+- [ ] Myanmar 
+- [ ] English

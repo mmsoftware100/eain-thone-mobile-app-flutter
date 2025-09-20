@@ -8,6 +8,7 @@ import 'transaction_form_screen.dart';
 import 'transaction_detail_screen.dart';
 import 'transaction_list_screen.dart';
 import 'settings_screen.dart';
+import 'dashboard_screen.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -34,6 +35,16 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Family Expenses'),
         elevation: 0,
         actions: [
+          // Dashboard
+          IconButton(
+            icon: const Icon(Icons.dashboard),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DashboardScreen()),
+              );
+            },
+          ),
           // Sync Status Indicator
           Consumer<SyncProvider>(
             builder: (context, syncProvider, child) {
