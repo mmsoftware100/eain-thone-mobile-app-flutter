@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../providers/transaction_provider.dart';
-import '../models/transaction.dart';
 import 'package:intl/intl.dart';
+import '../models/transaction.dart';
+import '../providers/transaction_provider.dart';
+import '../utils/number_formatter.dart';
 
 class TransactionFormScreen extends StatefulWidget {
   final Transaction? transaction;
@@ -56,7 +58,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     super.initState();
     if (widget.transaction != null) {
       _descriptionController.text = widget.transaction!.description;
-      _amountController.text = widget.transaction!.amount.toString();
+      _amountController.text = NumberFormatter.formatNumber(widget.transaction!.amount);
       _selectedType = widget.transaction!.type;
       _selectedCategory = widget.transaction!.category;
       _selectedDate = widget.transaction!.date;
@@ -97,7 +99,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       final transaction = Transaction(
         id: widget.transaction?.id,
         description: _descriptionController.text.trim(),
-        amount: double.parse(_amountController.text),
+        amount: NumberFormatter.getNumericValue(_amountController.text) ?? 0.0,
         category: _selectedCategory,
         type: _selectedType,
         date: _selectedDate,
@@ -197,6 +199,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                              controller: _amountController,
                              focusNode: _amountFocusNode,
                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                             inputFormatters: [NumberFormatter()],
                              textAlign: TextAlign.center,
                              style: TextStyle(
                                fontSize: 36,
@@ -222,7 +225,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Enter amount';
                               }
-                              final amount = double.tryParse(value);
+                              final amount = NumberFormatter.getNumericValue(value);
                               if (amount == null || amount <= 0) {
                                 return 'Enter valid amount';
                               }

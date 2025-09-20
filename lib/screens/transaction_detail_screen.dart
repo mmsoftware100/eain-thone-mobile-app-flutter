@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
-import 'transaction_form_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../models/transaction.dart';
+import '../providers/transaction_provider.dart';
+import '../utils/number_formatter.dart';
+import 'transaction_form_screen.dart';
 
 class TransactionDetailScreen extends StatefulWidget {
   final Transaction transaction;
@@ -76,7 +79,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${isIncome ? '+' : '-'}\$${currentTransaction.amount.toStringAsFixed(2)}',
+                      '${isIncome ? '+' : '-'}\$${NumberFormatter.formatNumber(currentTransaction.amount)}',
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isIncome ? Colors.green[700] : Colors.red[700],

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
+import '../providers/transaction_provider.dart';
+import '../utils/number_formatter.dart';
 import 'transaction_detail_screen.dart';
 import 'transaction_form_screen.dart';
 
@@ -92,6 +93,25 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
     return transactions.sublist(startIndex, endIndex);
   }
 
+  Map<String, double> _calculateSummary(List<Transaction> transactions) {
+    double totalIncome = 0;
+    double totalExpense = 0;
+
+    for (final transaction in transactions) {
+      if (transaction.type == TransactionType.income) {
+        totalIncome += transaction.amount;
+      } else {
+        totalExpense += transaction.amount;
+      }
+    }
+
+    return {
+      'income': totalIncome,
+      'expense': totalExpense,
+      'net': totalIncome - totalExpense,
+    };
+  }
+
   int _getMonthIndex(String monthName) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -154,6 +174,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
           final filteredTransactions = _getFilteredTransactions(transactionProvider.transactions);
           final paginatedTransactions = _getPaginatedTransactions(filteredTransactions);
           final totalPages = (filteredTransactions.length / _itemsPerPage).ceil();
+          final summary = _calculateSummary(filteredTransactions);
 
           return Column(
             children: [
@@ -182,6 +203,9 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
 
               // Active Filters Display
               if (_hasActiveFilters()) _buildActiveFiltersChips(),
+
+              // Summary Cards
+              if (filteredTransactions.isNotEmpty) _buildSummaryCards(summary),
 
               // Results Summary
               Padding(
@@ -272,7 +296,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
           ],
         ),
         trailing: Text(
-          '${transaction.type == TransactionType.income ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+          '${transaction.type == TransactionType.income ? '+' : '-'}\$${NumberFormatter.formatNumber(transaction.amount)}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -548,6 +572,122 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCards(Map<String, double> summary) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          // Total Balance Card
+          SizedBox(
+            width: double.infinity,
+            child: Card(
+              color: summary['net']! >= 0 ? Colors.green[50] : Colors.red[50],
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Current Filter',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '\$${NumberFormatter.formatNumber(summary['net']!)}',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: summary['net']! >= 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Net Balance',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Income and Expense Cards
+          Row(
+            children: [
+              Expanded(
+                child: Card(
+                  color: Colors.green[50],
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.trending_up,
+                          color: Colors.green[600],
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '\$${NumberFormatter.formatNumber(summary['income']!)}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                        Text(
+                          'Income',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.green[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Card(
+                  color: Colors.red[50],
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.trending_down,
+                          color: Colors.red[600],
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '\$${NumberFormatter.formatNumber(summary['expense']!)}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red[700],
+                          ),
+                        ),
+                        Text(
+                          'Expenses',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.red[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

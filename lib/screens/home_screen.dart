@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/sync_provider.dart';
 import '../models/transaction.dart';
+import '../utils/number_formatter.dart';
 import 'transaction_form_screen.dart';
 import 'transaction_detail_screen.dart';
 import 'transaction_list_screen.dart';
@@ -211,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${(summary['income']! - summary['expense']!).toStringAsFixed(2)}',
+                    '\$${NumberFormatter.formatNumber(summary['income']! - summary['expense']!)}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: (summary['income']! - summary['expense']!) >= 0
@@ -250,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '\$${summary['income']!.toStringAsFixed(2)}',
+                        '\$${NumberFormatter.formatNumber(summary['income']!)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.green[700],
@@ -282,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '\$${summary['expense']!.toStringAsFixed(2)}',
+                        '\$${NumberFormatter.formatNumber(summary['expense']!)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.red[700],
@@ -337,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '${isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+              '${isIncome ? '+' : '-'}\$${NumberFormatter.formatNumber(transaction.amount)}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isIncome ? Colors.green[700] : Colors.red[700],
