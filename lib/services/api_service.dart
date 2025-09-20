@@ -110,9 +110,20 @@ class ApiService {
         setAuthToken(response.data['token']); // Set token from root level
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error(response.data['message'] ?? 'Registration failed');
+        // Handle error response from server
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Registration failed';
+        return ApiResponse.error(errorMessage);
       }
     } on DioException catch (e) {
+      // Handle HTTP errors and extract server error messages
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
       return ApiResponse.error('Unexpected error: $e');
@@ -252,9 +263,20 @@ class ApiService {
         final user = User.fromJson(response.data['data']['user']);
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error(response.data['message'] ?? 'Failed to fetch user profile');
+        // Handle error response from server
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to fetch user profile';
+        return ApiResponse.error(errorMessage);
       }
     } on DioException catch (e) {
+      // Handle HTTP errors and extract server error messages
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
       return ApiResponse.error('Unexpected error: $e');
@@ -272,9 +294,20 @@ class ApiService {
         final user = User.fromJson(response.data['data']['user']);
         return ApiResponse.success(user);
       } else {
-        return ApiResponse.error(response.data['message'] ?? 'Failed to update profile');
+        // Handle error response from server
+        final errorMessage = response.data['error'] ?? 
+                           response.data['message'] ?? 
+                           'Failed to update profile';
+        return ApiResponse.error(errorMessage);
       }
     } on DioException catch (e) {
+      // Handle HTTP errors and extract server error messages
+      if (e.response?.data != null) {
+        final errorMessage = e.response!.data['error'] ?? 
+                           e.response!.data['message'] ?? 
+                           _handleDioError(e);
+        return ApiResponse.error(errorMessage);
+      }
       return ApiResponse.error(_handleDioError(e));
     } catch (e) {
       return ApiResponse.error('Unexpected error: $e');
