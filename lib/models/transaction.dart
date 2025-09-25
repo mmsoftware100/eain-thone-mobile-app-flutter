@@ -106,8 +106,10 @@ class Transaction {
     };
   }
 
-  factory Transaction.fromJson(String source) => 
-      Transaction.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Transaction.fromJson(String source) {
+    final map = json.decode(source) as Map<String, dynamic>;
+    return Transaction.fromMap(map);
+  }
 
   @override
   String toString() {
